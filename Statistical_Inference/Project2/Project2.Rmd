@@ -1,0 +1,60 @@
+---
+title: "Analysis of the ToothGrowth Dataset"
+author: "Krzysztof Jarszak"
+date: "Sunday, March 22, 2015"
+output: pdf_document
+---
+
+## Overview
+
+This project report attempts to carry out some basic data analysis of the ToothGrowth dataset contained in the 'datasets' package in R. The ToothGrowth dataset contains response of the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+
+## Summary and Exploratory Analysis
+
+In this section, we attempt to summarize the dataset and carry out some exploratory analysis. We first load the dataset.
+```{r }
+library(datasets)
+data(ToothGrowth)
+head(ToothGrowth)
+tail(ToothGrowth)
+```
+
+Next we view the structure of the dataset and some summary statistics.
+
+```{r}
+str(ToothGrowth)
+summary(ToothGrowth)
+```
+
+From the output above, the ToothGrowth dataset contains 3 variable viz 'len' which is the length of the teeth, 'supp' which is a factor variable indicating the supplement type and 'dose' indicating the dose in milligrams. Some basic summary statistics of the dataset is also shown.
+
+Next we try to explore the dataset using some plots. Shown below is a histogram showing the distribution of the length of the teeth. 
+
+```{r}
+hist(ToothGrowth$len, col = 'grey', main= 'Histogram of Tooth Length',
+     ylab= 'Tooth Length')
+```
+
+We can also plot a boxplot to show the distribution of the len variable with respect to the supp and dose variables. 
+```{r, fig.height=4, fig.width= 6}
+boxplot(ToothGrowth$len~ToothGrowth$supp, col = 'grey', 
+        main = 'Boxplot Showing the Distribution of the Length of Teeth')
+boxplot(ToothGrowth$len~ToothGrowth$dose, col = 'grey', 
+        main = 'Boxplot Showing the Distribution of the Length of Teeth')
+```
+
+The two figures above seem to show a lot of interesting leads we can explore further. First, there seem to be an increase in tooth growth with higher dosage of Vitamin C (from the second figure) and orange juice seem to be a better delivery method than ascorbic acid (from the first figure). We can explore these claims further using former tests of hypothesis. Specifically, we will test if there is a significant difference in ToothGrowth across the delivery method. We'll use paired sample T test for this because the same guinea pigs(subjects) were used across the two delivery methods (factors).
+
+```{r}
+t.test(ToothGrowth$len~ToothGrowth$supp, paired = T, var.equal = T)
+```
+The above block of code performs a paired sample T test to test the null hypothesis that the true difference in mean of tooth lengths is zero (i.e there is no significant difference in tooth length across the levels of delivery methods) versus the alternate hypothesis that the true difference in means is not equal to zero (i.e, delivery methods have an effect on tooth growth). The reported p-value 0.00255 (which is the probability of having a t statistics as high as 3.3026 if the different types of delivery methods do not differ in tooth length ) is less than 0.05, hence we reject the null hypothesis and conclude that there is indeed a significant difference in tooth length across the delivery methods. The reported confidence interval with lower bound 1.41 and upper bound 5.99 also agree with the conclusion of the test. This is because the 95% confidence interval does not include the value 0. This means that if we were to repeatedly take samples, about 95% of the interval would contain the mean difference 3.7 (but not zero).
+
+##  Assumptions.
+
+1. Depedence: To use paired sample t test, the observations must be paired or dependent. This assumption is not violated as the same set of guinea pigs were used across the two delivery methods.
+
+2. Equal Variance: The two delivery methods seem to have the same variability. This is confirmed by the width of the boxes in the first boxplot of the Exploratory Section. Since the two boxes seem to have approximately the same with, we can assume equal variance for the two delivery methods.
+
+3. Normality Assumption: The histogram plot of the length variable does not seem to follow the bell shape of the Normal distribution. Also our sample size(30) for the test is not sufficiently large. This should be a source of concern but since we used t test, I think the conclusions of the test should be valid.
+
